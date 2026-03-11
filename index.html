@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meine Flashcards · Deutsch lernen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:    #0f0e0c;
+      --cream:  #f5f0e8;
+      --warm:   #e8dfc8;
+      --accent: #c84b2f;
+      --gold:   #c49a3c;
+      --muted:  #8a8070;
+    }
+
+    body {
+      background-color: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Lang switcher ── */
+    .lang-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.4rem;
+      padding: 0.8rem 2rem 0;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .lang-btn {
+      padding: 0.25rem 0.7rem;
+      border: 1.5px solid var(--ink);
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--ink);
+    }
+
+    .lang-btn.active, .lang-btn:hover {
+      background: var(--ink);
+      color: var(--cream);
+    }
+
+    /* ── Header ── */
+    header {
+      position: relative;
+      padding: 3rem 2rem 2rem;
+      text-align: center;
+      border-bottom: 2px solid var(--ink);
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '✦';
+      position: absolute;
+      bottom: -0.65rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--cream);
+      padding: 0 1rem;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+
+    .header-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 8vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    h1 em { font-style: italic; color: var(--accent); }
+
+    .subtitle {
+      margin-top: 1rem;
+      font-size: 0.92rem;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      max-width: 1100px;
+      margin: 2.5rem auto 0;
+      padding: 0 2rem;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+      max-width: 380px;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: 0.65rem 1rem 0.65rem 2.6rem;
+      background: transparent;
+      border: 1.5px solid var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-wrap input:focus { border-color: var(--accent); }
+
+    .search-icon {
+      position: absolute;
+      left: 0.8rem; top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .filter-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    .tag-btn {
+      padding: 0.45rem 1rem;
+      border: 1.5px solid var(--ink);
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.18s;
+      color: var(--ink);
+    }
+
+    .tag-btn:hover, .tag-btn.active {
+      background: var(--ink);
+      color: var(--cream);
+    }
+
+    .btn-add {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.4rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: background 0.18s, transform 0.12s;
+    }
+
+    .btn-add:hover { background: #a63a22; transform: translateY(-1px); }
+
+    /* ── Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 2.5rem auto 4rem;
+      padding: 0 2rem;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--cream);
+      border: 1.5px solid var(--ink);
+      padding: 1.6rem;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.18s;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 5px 5px 0 var(--ink);
+    }
+
+    .card-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--warm);
+      line-height: 1;
+      position: absolute;
+      top: 0.9rem; right: 1.1rem;
+      -webkit-text-stroke: 1.5px var(--ink);
+    }
+
+    .card-category {
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.7rem;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+      padding-right: 2rem;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 1.2rem;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-link {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--ink);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .card-link:hover { color: var(--accent); border-color: var(--accent); }
+    .card-date { font-size: 0.7rem; color: var(--muted); }
+
+    /* ── Empty state ── */
+    .empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--muted);
+    }
+
+    .empty p:first-child {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--ink);
+    }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(15,14,12,0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      padding: 2.2rem;
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      animation: fadeUp 0.25s ease;
+    }
+
+    .modal h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .field { margin-bottom: 1rem; }
+
+    .field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .field input, .field textarea {
+      width: 100%;
+      padding: 0.6rem 0.9rem;
+      border: 1.5px solid var(--ink);
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+
+    .field input:focus, .field textarea:focus { border-color: var(--accent); }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 1.4rem;
+      justify-content: flex-end;
+    }
+
+    .btn-cancel {
+      padding: 0.6rem 1.2rem;
+      border: 1.5px solid var(--ink);
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--ink);
+    }
+
+    .btn-cancel:hover { background: var(--warm); }
+
+    .btn-save {
+      padding: 0.6rem 1.4rem;
+      background: var(--ink);
+      color: var(--cream);
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-save:hover { background: var(--accent); }
+
+    .btn-close {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      background: none; border: none;
+      font-size: 1.3rem; cursor: pointer;
+      color: var(--muted); line-height: 1;
+    }
+
+    /* ── Stats ── */
+    .stats {
+      max-width: 1100px;
+      margin: 2rem auto 0;
+      padding: 0 2rem;
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .stat { display: flex; align-items: baseline; gap: 0.4rem; }
+
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .stat-label { font-size: 0.75rem; color: var(--muted); font-weight: 300; }
+
+    .divider {
+      max-width: 1100px;
+      margin: 1.5rem auto 0;
+      padding: 0 2rem;
+      border: none;
+      border-top: 1px solid rgba(15,14,12,0.15);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      border-top: 1px solid rgba(15,14,12,0.12);
+      letter-spacing: 0.08em;
+    }
+
+    @media (max-width: 600px) {
+      .controls { flex-direction: column; align-items: stretch; }
+      .search-wrap { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="lang-bar">
+    <button class="lang-btn active" onclick="setLang('de')" id="btn-de">DE</button>
+    <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+  </div>
+
+  <header>
+    <p class="header-label" data-de="Persönliche Sammlung" data-en="Personal Collection">Persönliche Sammlung</p>
+    <h1 data-de="Meine <em>Flash</em>karten" data-en="My <em>Flash</em>cards">Meine <em>Flash</em>karten</h1>
+    <p class="subtitle" data-de="Ein Ort zum Lernen, Wiederholen und Erinnern." data-en="A place to learn, review and remember.">Ein Ort zum Lernen, Wiederholen und Erinnern.</p>
+  </header>
+
+  <section class="stats">
+    <div class="stat"><span class="stat-num" id="totalCount">0</span><span class="stat-label" data-de="Karten gesamt" data-en="cards total">Karten gesamt</span></div>
+    <div class="stat"><span class="stat-num" id="catCount">0</span><span class="stat-label" data-de="Kategorien" data-en="categories">Kategorien</span></div>
+  </section>
+
+  <hr class="divider"/>
+
+  <section class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="searchInput" data-de-placeholder="Karteikarte suchen…" data-en-placeholder="Search flashcard…" placeholder="Karteikarte suchen…" oninput="render()"/>
+    </div>
+    <div class="filter-tags" id="filterTags"></div>
+    <button class="btn-add" onclick="openModal()">
+      <span>＋</span>
+      <span data-de="Neue Karte" data-en="New card">Neue Karte</span>
+    </button>
+  </section>
+
+  <main class="grid" id="grid"></main>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <button class="btn-close" onclick="closeModal()">✕</button>
+      <h2 id="modalTitle" data-de="Neue Karteikarte" data-en="New flashcard">Neue Karteikarte</h2>
+      <div class="field">
+        <label data-de="Titel" data-en="Title">Titel</label>
+        <input type="text" id="fTitle" data-de-placeholder="Name der Karteikarte" data-en-placeholder="Flashcard name" placeholder="Name der Karteikarte"/>
+      </div>
+      <div class="field">
+        <label data-de="Beschreibung" data-en="Description">Beschreibung</label>
+        <textarea id="fDesc" rows="2" data-de-placeholder="Kurze Beschreibung des Themas…" data-en-placeholder="Short description of the topic…" placeholder="Kurze Beschreibung des Themas…"></textarea>
+      </div>
+      <div class="field">
+        <label data-de="URL des Projekts" data-en="Project URL">URL des Projekts</label>
+        <input type="url" id="fUrl" placeholder="https://usuario.github.io/projekt"/>
+      </div>
+      <div class="field">
+        <label data-de="Kategorie" data-en="Category">Kategorie</label>
+        <input type="text" id="fCat" data-de-placeholder="z. B. Verben, Nomen, Grammatik…" data-en-placeholder="e.g. Verbs, Nouns, Grammar…" placeholder="z. B. Verben, Nomen, Grammatik…"/>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()" data-de="Abbrechen" data-en="Cancel">Abbrechen</button>
+        <button class="btn-save" onclick="saveCard()" data-de="Speichern" data-en="Save">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    de_flashcards &nbsp;·&nbsp;
+    <span data-de="Deutsch lernen mit Claude" data-en="Learning German with Claude">Deutsch lernen mit Claude</span>
+    &nbsp;·&nbsp; <span id="year"></span>
+  </footer>
+
+  <script>
+    // ── i18n ─────────────────────────────────────────────────────────────────
+    let lang = localStorage.getItem('fc_lang') || 'de';
+
+    function setLang(l) {
+      lang = l;
+      localStorage.setItem('fc_lang', l);
+      document.querySelectorAll('[data-de]').forEach(el => {
+        el.innerHTML = el.getAttribute('data-' + l);
+      });
+      document.querySelectorAll('[data-de-placeholder]').forEach(el => {
+        el.placeholder = el.getAttribute('data-' + l + '-placeholder');
+      });
+      document.getElementById('btn-de').classList.toggle('active', l === 'de');
+      document.getElementById('btn-en').classList.toggle('active', l === 'en');
+      render();
+    }
+
+    // ── Data ─────────────────────────────────────────────────────────────────
+    const STORAGE_KEY = 'de_flashcards_v1';
+
+    function loadCards() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveCards(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+    let cards = loadCards();
+    let activeFilter = 'ALL';
+    let editingId = null;
+
+    // ── Render ────────────────────────────────────────────────────────────────
+    function allCategories() {
+      return [...new Set(cards.map(c => c.category).filter(Boolean))];
+    }
+
+    function t(de, en) { return lang === 'de' ? de : en; }
+
+    function render() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+
+      // Filter tags
+      const tagsEl = document.getElementById('filterTags');
+      const cats = allCategories();
+      const allLabel = t('Alle', 'All');
+      tagsEl.innerHTML = [allLabel, ...cats].map((c, i) => {
+        const key = i === 0 ? 'ALL' : c;
+        return `<button class="tag-btn${key === activeFilter ? ' active' : ''}" onclick="setFilter('${key}')">${c}</button>`;
+      }).join('');
+
+      // Filtered
+      let filtered = cards.filter(c => {
+        const matchCat = activeFilter === 'ALL' || c.category === activeFilter;
+        const matchQ = !query || c.title.toLowerCase().includes(query) || (c.desc||'').toLowerCase().includes(query);
+        return matchCat && matchQ;
+      });
+
+      // Stats
+      document.getElementById('totalCount').textContent = cards.length;
+      document.getElementById('catCount').textContent = allCategories().length;
+
+      const grid = document.getElementById('grid');
+
+      if (filtered.length === 0) {
+        const emptyTitle = t('Noch keine Karten', 'No cards yet');
+        const emptySub = t('Füge deine erste Karteikarte oben hinzu.', 'Add your first flashcard above.');
+        grid.innerHTML = `<div class="empty"><p>${emptyTitle}</p><p>${emptySub}</p></div>`;
+        return;
+      }
+
+      const openLabel = t('Öffnen →', 'Open →');
+      grid.innerHTML = filtered.map((c, i) => `
+        <article class="card" style="animation-delay:${i * 0.04}s">
+          <span class="card-number">${String(i + 1).padStart(2, '0')}</span>
+          <p class="card-category">${esc(c.category || 'General')}</p>
+          <h2 class="card-title">${esc(c.title)}</h2>
+          <p class="card-desc">${esc(c.desc || '')}</p>
+          <div class="card-footer">
+            ${c.url ? `<a class="card-link" href="${esc(c.url)}" target="_blank" rel="noopener">${openLabel}</a>` : `<span></span>`}
+            <div style="display:flex;gap:.6rem;align-items:center">
+              <span class="card-date">${c.date || ''}</span>
+              <button onclick="editCard('${c.id}')" style="background:none;border:none;cursor:pointer;font-size:.8rem;color:var(--muted)" title="${t('Bearbeiten','Edit')}">✎</button>
+              <button onclick="deleteCard('${c.id}')" style="background:none;border:none;cursor:pointer;font-size:.8rem;color:var(--muted)" title="${t('Löschen','Delete')}">✕</button>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function esc(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function setFilter(key) { activeFilter = key; render(); }
+
+    // ── Modal ─────────────────────────────────────────────────────────────────
+    function openModal(id = null) {
+      editingId = id;
+      const titleEl = document.getElementById('modalTitle');
+      titleEl.textContent = id ? t('Karte bearbeiten', 'Edit card') : t('Neue Karteikarte', 'New flashcard');
+      if (id) {
+        const c = cards.find(x => x.id === id);
+        document.getElementById('fTitle').value = c.title;
+        document.getElementById('fDesc').value = c.desc || '';
+        document.getElementById('fUrl').value = c.url || '';
+        document.getElementById('fCat').value = c.category || '';
+      } else {
+        ['fTitle','fDesc','fUrl','fCat'].forEach(id => document.getElementById(id).value = '');
+      }
+      document.getElementById('modalOverlay').classList.add('open');
+      document.getElementById('fTitle').focus();
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+      editingId = null;
+    }
+
+    function saveCard() {
+      const title = document.getElementById('fTitle').value.trim();
+      if (!title) { document.getElementById('fTitle').focus(); return; }
+      const now = new Date().toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', {day:'2-digit', month:'short', year:'numeric'});
+      const card = {
+        id: editingId || Date.now().toString(36),
+        title,
+        desc: document.getElementById('fDesc').value.trim(),
+        url: document.getElementById('fUrl').value.trim(),
+        category: document.getElementById('fCat').value.trim() || t('Allgemein','General'),
+        date: editingId ? (cards.find(c=>c.id===editingId)||{}).date : now
+      };
+      cards = editingId ? cards.map(c => c.id === editingId ? card : c) : [...cards, card];
+      saveCards(cards);
+      closeModal();
+      render();
+    }
+
+    function editCard(id) { openModal(id); }
+
+    function deleteCard(id) {
+      if (!confirm(t('Diese Karte löschen?', 'Delete this card?'))) return;
+      cards = cards.filter(c => c.id !== id);
+      saveCards(cards);
+      render();
+    }
+
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    document.getElementById('year').textContent = new Date().getFullYear();
+    setLang(lang);
+  </script>
+</body>
+</html>
