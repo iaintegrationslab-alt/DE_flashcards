@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schwimmbad – Flash Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue-deep: #0a2342;
+    --blue-mid: #1a5276;
+    --blue-light: #2e86c1;
+    --cyan: #48c9b0;
+    --white: #f0f8ff;
+    --gold: #f4d03f;
+    --card-bg: rgba(255,255,255,0.07);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--blue-deep);
+    min-height: 100vh;
+    color: var(--white);
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Water ripple background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 80%, rgba(46,134,193,0.3) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(72,201,176,0.2) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(26,82,118,0.5) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Animated waves */
+  .waves {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 120px;
+    z-index: 0;
+    opacity: 0.15;
+  }
+  .wave {
+    position: absolute;
+    bottom: 0;
+    left: -100%;
+    width: 300%;
+    height: 100%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 C150,100 350,0 600,60 C850,120 1050,20 1200,60 L1200,120 L0,120 Z' fill='%2348c9b0'/%3E%3C/svg%3E") repeat-x;
+    background-size: 600px 100%;
+    animation: wave-anim 8s linear infinite;
+  }
+  .wave:nth-child(2) { opacity: 0.5; animation-duration: 12s; animation-delay: -4s; }
+  .wave:nth-child(3) { opacity: 0.3; animation-duration: 16s; animation-delay: -8s; }
+  @keyframes wave-anim { from { left: -100%; } to { left: 0%; } }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 30px 20px 120px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.8rem, 8vw, 4.5rem);
+    letter-spacing: 4px;
+    color: var(--cyan);
+    text-shadow: 0 0 30px rgba(72,201,176,0.4);
+    line-height: 1;
+  }
+
+  header p {
+    font-size: 0.9rem;
+    color: rgba(240,248,255,0.6);
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+
+  /* Category tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    padding: 8px 20px;
+    border-radius: 30px;
+    border: 1.5px solid rgba(72,201,176,0.3);
+    background: transparent;
+    color: rgba(240,248,255,0.6);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .tab:hover { border-color: var(--cyan); color: var(--cyan); }
+  .tab.active {
+    background: var(--cyan);
+    border-color: var(--cyan);
+    color: var(--blue-deep);
+    font-weight: 600;
+  }
+
+  /* Progress */
+  .progress-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--gold));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-text {
+    text-align: center;
+    font-size: 0.8rem;
+    color: rgba(240,248,255,0.5);
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+
+  /* Card */
+  .card-area {
+    perspective: 1200px;
+    margin-bottom: 28px;
+    cursor: pointer;
+  }
+
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .card-inner.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    border: 1.5px solid rgba(72,201,176,0.2);
+    backdrop-filter: blur(10px);
+  }
+
+  .card-front {
+    background: linear-gradient(135deg, rgba(26,82,118,0.8), rgba(10,35,66,0.9));
+  }
+
+  .card-back {
+    background: linear-gradient(135deg, rgba(72,201,176,0.15), rgba(46,134,193,0.25));
+    transform: rotateY(180deg);
+    border-color: rgba(72,201,176,0.4);
+  }
+
+  .card-label {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+
+  .card-word {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 6vw, 3rem);
+    letter-spacing: 2px;
+    text-align: center;
+    color: var(--white);
+    line-height: 1.1;
+  }
+
+  .card-sub {
+    font-size: 0.85rem;
+    color: rgba(240,248,255,0.5);
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .card-conjugation {
+    font-size: 0.75rem;
+    color: rgba(72,201,176,0.7);
+    margin-top: 8px;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .flip-hint {
+    font-size: 0.72rem;
+    color: rgba(240,248,255,0.3);
+    letter-spacing: 1px;
+    margin-top: 20px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.7} }
+
+  /* Buttons */
+  .controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .btn {
+    padding: 12px 28px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-wrong {
+    background: rgba(231,76,60,0.2);
+    color: #e74c3c;
+    border: 1.5px solid rgba(231,76,60,0.4);
+  }
+  .btn-wrong:hover { background: rgba(231,76,60,0.35); transform: translateY(-1px); }
+
+  .btn-correct {
+    background: rgba(72,201,176,0.2);
+    color: var(--cyan);
+    border: 1.5px solid rgba(72,201,176,0.4);
+  }
+  .btn-correct:hover { background: rgba(72,201,176,0.35); transform: translateY(-1px); }
+
+  .btn-nav {
+    background: rgba(255,255,255,0.07);
+    color: rgba(240,248,255,0.7);
+    border: 1.5px solid rgba(255,255,255,0.1);
+  }
+  .btn-nav:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  /* Score */
+  .score-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-size: 0.82rem;
+    color: rgba(240,248,255,0.5);
+  }
+  .score-row span { display: flex; align-items: center; gap: 5px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot-green { background: var(--cyan); }
+  .dot-red { background: #e74c3c; }
+
+  /* Shuffle notice */
+  .shuffle-btn {
+    display: block;
+    margin: 16px auto 0;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(240,248,255,0.4);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .shuffle-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  /* Finish screen */
+  .finish-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .finish-screen.show { display: block; }
+  .finish-icon { font-size: 4rem; margin-bottom: 16px; }
+  .finish-screen h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    color: var(--cyan);
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+  }
+  .finish-screen p { color: rgba(240,248,255,0.6); margin-bottom: 24px; }
+  .btn-restart {
+    background: var(--cyan);
+    color: var(--blue-deep);
+    border: none;
+    padding: 14px 36px;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-restart:hover { transform: scale(1.04); }
+
+  .main-card-area { }
+  .main-card-area.hide { display: none; }
+</style>
+</head>
+<body>
+
+<div class="waves">
+  <div class="wave"></div>
+  <div class="wave"></div>
+  <div class="wave"></div>
+</div>
+
+<div class="container">
+  <header>
+    <h1>🏊 Schwimmbad</h1>
+    <p>WORTSCHATZ · FLASH CARDS · ALEMÁN–INGLÉS</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setCategory('all')">Todas (56)</button>
+    <button class="tab" onclick="setCategory('nomen')">🔵 Nomen (27)</button>
+    <button class="tab" onclick="setCategory('verben')">🟢 Verben (12)</button>
+    <button class="tab" onclick="setCategory('adjektive')">🟡 Adjektive (15)</button>
+    <button class="tab" onclick="setCategory('wrong')">❌ Falladas</button>
+  </div>
+
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">1 / 56</div>
+
+  <div class="main-card-area" id="mainArea">
+    <div class="card-area" onclick="flipCard()" id="cardArea">
+      <div class="card-inner" id="cardInner">
+        <div class="card-face card-front">
+          <div class="card-label" id="cardLabel">DEUTSCH</div>
+          <div class="card-word" id="cardFrontWord"></div>
+          <div class="card-sub" id="cardFrontSub"></div>
+          <div class="flip-hint">↕ toca para voltear</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-label">ENGLISH</div>
+          <div class="card-word" id="cardBackWord"></div>
+          <div class="card-conjugation" id="cardBackSub"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls" id="answerBtns" style="display:none;">
+      <button class="btn btn-wrong" onclick="markAnswer(false)">✗ No sabía</button>
+      <button class="btn btn-correct" onclick="markAnswer(true)">✓ Lo sabía</button>
+    </div>
+
+    <div class="controls" id="navBtns">
+      <button class="btn btn-nav" onclick="prevCard()" id="prevBtn">← Anterior</button>
+      <button class="btn btn-nav" onclick="flipCard()">🔄 Voltear</button>
+      <button class="btn btn-nav" onclick="nextCard()" id="nextBtn">Siguiente →</button>
+    </div>
+
+    <div class="score-row">
+      <span><span class="dot dot-green"></span> Correctas: <strong id="scoreCorrect">0</strong></span>
+      <span><span class="dot dot-red"></span> Falladas: <strong id="scoreWrong">0</strong></span>
+    </div>
+
+    <button class="shuffle-btn" onclick="shuffleCards()">🔀 Barajar tarjetas</button>
+  </div>
+
+  <div class="finish-screen" id="finishScreen">
+    <div class="finish-icon">🏆</div>
+    <h2>¡Runde abgeschlossen!</h2>
+    <p id="finishMsg"></p>
+    <button class="btn-restart" onclick="restart()">Volver a empezar</button>
+  </div>
+</div>
+
+<script>
+const allCards = [
+  // NOMEN
+  { de: "das Schwimmbad", en: "swimming pool", type: "nomen", sub: "Nomen" },
+  { de: "das Hallenbad", en: "indoor pool", type: "nomen", sub: "Nomen" },
+  { de: "das Freibad", en: "outdoor pool", type: "nomen", sub: "Nomen" },
+  { de: "das Wasser", en: "water", type: "nomen", sub: "Nomen" },
+  { de: "das Becken", en: "pool / basin", type: "nomen", sub: "Nomen" },
+  { de: "das Schwimmbecken", en: "swimming pool", type: "nomen", sub: "Nomen" },
+  { de: "das Nichtschwimmerbecken", en: "shallow pool / non-swimmer pool", type: "nomen", sub: "Nomen" },
+  { de: "das Kinderbecken", en: "children's pool", type: "nomen", sub: "Nomen" },
+  { de: "der Nichtschwimmer", en: "non-swimmer", type: "nomen", sub: "Nomen" },
+  { de: "das Sprungbrett", en: "diving board", type: "nomen", sub: "Nomen" },
+  { de: "der Sprungturm", en: "diving tower", type: "nomen", sub: "Nomen" },
+  { de: "der Startblock", en: "starting block", type: "nomen", sub: "Nomen" },
+  { de: "die Rutsche", en: "slide", type: "nomen", sub: "Nomen" },
+  { de: "die Umkleidekabine", en: "changing room", type: "nomen", sub: "Nomen" },
+  { de: "der Spind", en: "locker", type: "nomen", sub: "Nomen" },
+  { de: "das Handtuch", en: "towel", type: "nomen", sub: "Nomen" },
+  { de: "die Badehose", en: "swimming trunks", type: "nomen", sub: "Nomen" },
+  { de: "der Badeanzug", en: "swimsuit", type: "nomen", sub: "Nomen" },
+  { de: "die Schwimmbrille", en: "swimming goggles", type: "nomen", sub: "Nomen" },
+  { de: "die Badekappe", en: "swim cap", type: "nomen", sub: "Nomen" },
+  { de: "die Schwimmflügel", en: "water wings / arm floaties", type: "nomen", sub: "Nomen" },
+  { de: "die Schwimmnudel", en: "pool noodle", type: "nomen", sub: "Nomen" },
+  { de: "der Rettungsring", en: "lifebuoy / life ring", type: "nomen", sub: "Nomen" },
+  { de: "der Bademeister", en: "lifeguard", type: "nomen", sub: "Nomen" },
+  { de: "die Dusche", en: "shower", type: "nomen", sub: "Nomen" },
+  { de: "die Eintrittskarte", en: "ticket", type: "nomen", sub: "Nomen" },
+  { de: "der Beckenrand", en: "pool edge", type: "nomen", sub: "Nomen" },
+  // VERBEN
+  { de: "schwimmen", en: "to swim", type: "verben", sub: "Verb", conj: "er schwimmt · schwamm · ist geschwommen" },
+  { de: "tauchen", en: "to dive", type: "verben", sub: "Verb", conj: "er taucht · tauchte · ist getaucht" },
+  { de: "springen", en: "to jump", type: "verben", sub: "Verb", conj: "er springt · sprang · ist gesprungen" },
+  { de: "planschen", en: "to splash", type: "verben", sub: "Verb", conj: "er planscht · planschte · hat geplanscht" },
+  { de: "baden", en: "to bathe", type: "verben", sub: "Verb", conj: "er badet · badete · hat gebadet" },
+  { de: "duschen", en: "to shower", type: "verben", sub: "Verb", conj: "er duscht · duschte · hat geduscht" },
+  { de: "sich umziehen", en: "to change clothes", type: "verben", sub: "Verb", conj: "er zieht sich um · zog sich um · hat sich umgezogen" },
+  { de: "rutschen", en: "to slide", type: "verben", sub: "Verb", conj: "er rutscht · rutschte · ist gerutscht" },
+  { de: "schwitzen", en: "to sweat", type: "verben", sub: "Verb", conj: "er schwitzt · schwitzte · hat geschwitzt" },
+  { de: "spielen", en: "to play", type: "verben", sub: "Verb", conj: "er spielt · spielte · hat gespielt" },
+  { de: "entspannen", en: "to relax", type: "verben", sub: "Verb", conj: "er entspannt · entspannte · hat entspannt" },
+  // ADJEKTIVE
+  { de: "nass", en: "wet", type: "adjektive", sub: "Adjektiv" },
+  { de: "trocken", en: "dry", type: "adjektive", sub: "Adjektiv" },
+  { de: "kalt", en: "cold", type: "adjektive", sub: "Adjektiv" },
+  { de: "warm", en: "warm", type: "adjektive", sub: "Adjektiv" },
+  { de: "tief", en: "deep", type: "adjektive", sub: "Adjektiv" },
+  { de: "flach", en: "shallow", type: "adjektive", sub: "Adjektiv" },
+  { de: "sauber", en: "clean", type: "adjektive", sub: "Adjektiv" },
+  { de: "schmutzig", en: "dirty", type: "adjektive", sub: "Adjektiv" },
+  { de: "rutschig", en: "slippery", type: "adjektive", sub: "Adjektiv" },
+  { de: "laut", en: "loud", type: "adjektive", sub: "Adjektiv" },
+  { de: "ruhig", en: "quiet", type: "adjektive", sub: "Adjektiv" },
+  { de: "voll", en: "crowded / full", type: "adjektive", sub: "Adjektiv" },
+  { de: "leer", en: "empty", type: "adjektive", sub: "Adjektiv" },
+  { de: "erfrischend", en: "refreshing", type: "adjektive", sub: "Adjektiv" },
+  { de: "sonnig", en: "sunny", type: "adjektive", sub: "Adjektiv" },
+];
+
+let deck = [...allCards];
+let current = 0;
+let flipped = false;
+let correct = 0;
+let wrong = 0;
+let wrongCards = [];
+let currentCategory = 'all';
+
+function setCategory(cat) {
+  currentCategory = cat;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+
+  if (cat === 'all') deck = [...allCards];
+  else if (cat === 'wrong') {
+    deck = wrongCards.length ? [...wrongCards] : [...allCards];
+  } else {
+    deck = allCards.filter(c => c.type === cat);
+  }
+
+  current = 0; correct = 0; wrong = 0;
+  document.getElementById('scoreCorrect').textContent = 0;
+  document.getElementById('scoreWrong').textContent = 0;
+  document.getElementById('finishScreen').classList.remove('show');
+  document.getElementById('mainArea').classList.remove('hide');
+  renderCard();
+}
+
+function renderCard() {
+  if (current >= deck.length) { showFinish(); return; }
+  const card = deck[current];
+  flipped = false;
+  document.getElementById('cardInner').classList.remove('flipped');
+  document.getElementById('cardLabel').textContent = card.sub.toUpperCase();
+  document.getElementById('cardFrontWord').textContent = card.de;
+  document.getElementById('cardFrontSub').textContent = '';
+  document.getElementById('cardBackWord').textContent = card.en;
+  document.getElementById('cardBackSub').textContent = card.conj || '';
+  document.getElementById('answerBtns').style.display = 'none';
+  document.getElementById('navBtns').style.display = 'flex';
+  document.getElementById('prevBtn').disabled = current === 0;
+  document.getElementById('nextBtn').disabled = false;
+  updateProgress();
+}
+
+function flipCard() {
+  flipped = !flipped;
+  document.getElementById('cardInner').classList.toggle('flipped', flipped);
+  if (flipped) {
+    document.getElementById('answerBtns').style.display = 'flex';
+    document.getElementById('navBtns').style.display = 'none';
+  } else {
+    document.getElementById('answerBtns').style.display = 'none';
+    document.getElementById('navBtns').style.display = 'flex';
+  }
+}
+
+function markAnswer(wasCorrect) {
+  if (wasCorrect) {
+    correct++;
+    document.getElementById('scoreCorrect').textContent = correct;
+  } else {
+    wrong++;
+    document.getElementById('scoreWrong').textContent = wrong;
+    if (!wrongCards.find(c => c.de === deck[current].de)) {
+      wrongCards.push(deck[current]);
+    }
+    // Update wrong tab count
+    document.querySelectorAll('.tab')[4].textContent = `❌ Falladas (${wrongCards.length})`;
+  }
+  current++;
+  renderCard();
+}
+
+function nextCard() {
+  if (current < deck.length - 1) { current++; renderCard(); }
+  else showFinish();
+}
+
+function prevCard() {
+  if (current > 0) { current--; renderCard(); }
+}
+
+function updateProgress() {
+  const pct = ((current) / deck.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${current + 1} / ${deck.length}`;
+}
+
+function shuffleCards() {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  current = 0; renderCard();
+}
+
+function showFinish() {
+  document.getElementById('mainArea').classList.add('hide');
+  document.getElementById('finishScreen').classList.add('show');
+  const total = correct + wrong;
+  const pct = total ? Math.round((correct / total) * 100) : 0;
+  document.getElementById('finishMsg').textContent =
+    `Acertaste ${correct} de ${total} tarjetas (${pct}%). ¡${pct >= 80 ? 'Ausgezeichnet! 🌟' : pct >= 50 ? 'Gut gemacht! 💪' : 'Sigue practicando! 📚'}`;
+}
+
+function restart() {
+  current = 0; correct = 0; wrong = 0;
+  document.getElementById('scoreCorrect').textContent = 0;
+  document.getElementById('scoreWrong').textContent = 0;
+  document.getElementById('finishScreen').classList.remove('show');
+  document.getElementById('mainArea').classList.remove('hide');
+  renderCard();
+}
+
+// Init
+renderCard();
+</script>
+</body>
+</html>
