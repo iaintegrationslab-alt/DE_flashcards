@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Wortschatz · Internationaler Frauentag</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#1a0a0f;
+  --surface:#251219;
+  --card:#2e1620;
+  --border:#5a2535;
+  --rose:#e8647a;
+  --gold:#d4a85a;
+  --text:#f2e8ea;
+  --muted:#9a7480;
+  --green:#5cb88a;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Outfit',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* petals bg */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 10% 20%, rgba(232,100,122,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 90% 80%, rgba(212,168,90,0.06) 0%, transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ── Header ── */
+header{
+  position:relative;
+  text-align:center;
+  padding:3.5rem 2rem 2.5rem;
+  border-bottom:1px solid var(--border);
+  z-index:1;
+}
+
+.header-eyebrow{
+  font-size:0.68rem;
+  letter-spacing:0.28em;
+  text-transform:uppercase;
+  color:var(--rose);
+  margin-bottom:0.8rem;
+}
+
+h1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.2rem,6vw,4rem);
+  font-weight:700;
+  line-height:1.1;
+  color:var(--text);
+}
+
+h1 span{color:var(--rose);font-style:italic;}
+
+.header-sub{
+  margin-top:0.8rem;
+  font-size:0.85rem;
+  color:var(--muted);
+  font-weight:300;
+}
+
+/* ── Progress bar ── */
+.progress-wrap{
+  max-width:700px;
+  margin:2rem auto 0;
+  padding:0 2rem;
+  z-index:1;
+  position:relative;
+}
+
+.progress-info{
+  display:flex;
+  justify-content:space-between;
+  font-size:0.72rem;
+  color:var(--muted);
+  margin-bottom:0.4rem;
+}
+
+.progress-bar{
+  height:3px;
+  background:var(--border);
+  border-radius:99px;
+  overflow:hidden;
+}
+
+.progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--rose),var(--gold));
+  border-radius:99px;
+  transition:width 0.4s ease;
+}
+
+/* ── Filter tabs ── */
+.tabs{
+  display:flex;
+  justify-content:center;
+  gap:0.5rem;
+  flex-wrap:wrap;
+  padding:1.5rem 2rem 0;
+  position:relative;
+  z-index:1;
+}
+
+.tab{
+  padding:0.4rem 1.1rem;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  font-family:'Outfit',sans-serif;
+  font-size:0.75rem;
+  font-weight:500;
+  letter-spacing:0.06em;
+  cursor:pointer;
+  border-radius:99px;
+  transition:all 0.18s;
+}
+
+.tab:hover{border-color:var(--rose);color:var(--text);}
+.tab.active{background:var(--rose);border-color:var(--rose);color:#fff;}
+
+/* ── Mode toggle ── */
+.mode-bar{
+  display:flex;
+  justify-content:center;
+  gap:0.5rem;
+  padding:1.2rem 2rem 0;
+  position:relative;
+  z-index:1;
+}
+
+.mode-btn{
+  padding:0.4rem 1.1rem;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  font-family:'Outfit',sans-serif;
+  font-size:0.75rem;
+  font-weight:500;
+  cursor:pointer;
+  border-radius:6px;
+  transition:all 0.18s;
+}
+
+.mode-btn.active{background:var(--surface);border-color:var(--gold);color:var(--gold);}
+
+/* ── Card arena ── */
+.arena{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:2.5rem 2rem 2rem;
+}
+
+/* ── Flashcard flip ── */
+.card-wrap{
+  width:100%;
+  max-width:540px;
+  perspective:1200px;
+  cursor:pointer;
+  margin-bottom:1.5rem;
+}
+
+.card-inner{
+  position:relative;
+  width:100%;
+  min-height:260px;
+  transform-style:preserve-3d;
+  transition:transform 0.55s cubic-bezier(.4,0,.2,1);
+}
+
+.card-wrap.flipped .card-inner{transform:rotateY(180deg);}
+
+.card-face{
+  position:absolute;
+  inset:0;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:var(--card);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:2.5rem 2rem;
+  min-height:260px;
+}
+
+.card-face.back{transform:rotateY(180deg);}
+
+.card-face::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:16px;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,100,122,0.07), transparent 70%);
+  pointer-events:none;
+}
+
+.card-label{
+  font-size:0.62rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:1rem;
+}
+
+.card-word{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.8rem,5vw,2.8rem);
+  font-weight:600;
+  text-align:center;
+  line-height:1.2;
+  color:var(--text);
+}
+
+.card-word .article{
+  font-size:0.55em;
+  color:var(--rose);
+  font-style:italic;
+  display:block;
+  margin-bottom:0.1em;
+}
+
+.card-type{
+  margin-top:0.8rem;
+  font-size:0.72rem;
+  color:var(--muted);
+  letter-spacing:0.08em;
+}
+
+.card-hint{
+  position:absolute;
+  bottom:1rem;
+  font-size:0.68rem;
+  color:var(--muted);
+  letter-spacing:0.1em;
+}
+
+/* back face extras */
+.card-translations{
+  display:flex;
+  flex-direction:column;
+  gap:0.5rem;
+  align-items:center;
+  width:100%;
+}
+
+.trans-row{
+  display:flex;
+  align-items:center;
+  gap:0.8rem;
+  font-size:0.78rem;
+}
+
+.trans-flag{font-size:1rem;}
+
+.trans-text{
+  font-size:1.1rem;
+  font-weight:400;
+  color:var(--text);
+}
+
+.trans-text.de-word{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.3rem;
+}
+
+.card-example{
+  margin-top:1.2rem;
+  padding:0.8rem 1rem;
+  border-left:2px solid var(--rose);
+  font-size:0.8rem;
+  color:var(--muted);
+  font-style:italic;
+  line-height:1.5;
+  width:100%;
+  max-width:400px;
+}
+
+/* ── Controls ── */
+.controls{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  margin-bottom:2rem;
+}
+
+.ctrl-btn{
+  width:48px;height:48px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  font-size:1.2rem;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.18s;
+}
+
+.ctrl-btn:hover{border-color:var(--rose);color:var(--rose);}
+
+.btn-known{
+  padding:0.6rem 1.6rem;
+  border-radius:99px;
+  border:none;
+  background:var(--green);
+  color:#fff;
+  font-family:'Outfit',sans-serif;
+  font-size:0.82rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.18s;
+  letter-spacing:0.04em;
+}
+
+.btn-known:hover{background:#4aa878;transform:translateY(-1px);}
+
+.btn-again{
+  padding:0.6rem 1.6rem;
+  border-radius:99px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  font-family:'Outfit',sans-serif;
+  font-size:0.82rem;
+  font-weight:500;
+  cursor:pointer;
+  transition:all 0.18s;
+}
+
+.btn-again:hover{border-color:var(--rose);color:var(--rose);}
+
+/* ── List view ── */
+.list-view{
+  display:none;
+  max-width:900px;
+  margin:2rem auto 4rem;
+  padding:0 2rem;
+  position:relative;
+  z-index:1;
+}
+
+.list-view.visible{display:block;}
+
+.list-group{margin-bottom:2.5rem;}
+
+.list-group-title{
+  font-size:0.65rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:var(--rose);
+  padding-bottom:0.6rem;
+  border-bottom:1px solid var(--border);
+  margin-bottom:0.8rem;
+}
+
+.list-row{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:0.3rem 1rem;
+  padding:0.55rem 0;
+  border-bottom:1px solid rgba(90,37,53,0.3);
+  font-size:0.85rem;
+  align-items:baseline;
+  transition:background 0.15s;
+  border-radius:4px;
+  padding-left:0.5rem;
+}
+
+.list-row:hover{background:rgba(232,100,122,0.05);}
+
+.list-de{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1rem;
+  font-weight:600;
+  color:var(--text);
+}
+
+.list-de .art{color:var(--rose);font-weight:400;font-size:0.85em;margin-right:0.2em;}
+.list-en{color:var(--muted);}
+.list-es{color:var(--gold);}
+
+/* ── Stats summary ── */
+.summary{
+  position:relative;z-index:1;
+  max-width:540px;
+  margin:0 auto 3rem;
+  padding:0 2rem;
+  display:flex;
+  gap:1.5rem;
+  justify-content:center;
+}
+
+.stat{text-align:center;}
+.stat-n{
+  font-family:'Cormorant Garamond',serif;
+  font-size:2rem;
+  font-weight:700;
+  line-height:1;
+  color:var(--rose);
+}
+.stat-l{font-size:0.68rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:0.2rem;}
+
+/* done screen */
+.done-screen{
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  gap:1rem;
+  padding:3rem 2rem;
+  text-align:center;
+  position:relative;z-index:1;
+}
+
+.done-screen.visible{display:flex;}
+.done-emoji{font-size:3rem;}
+.done-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:2rem;
+  color:var(--text);
+}
+.done-sub{font-size:0.9rem;color:var(--muted);}
+.btn-restart{
+  margin-top:1rem;
+  padding:0.7rem 2rem;
+  border-radius:99px;
+  border:none;
+  background:var(--rose);
+  color:#fff;
+  font-family:'Outfit',sans-serif;
+  font-size:0.9rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.18s;
+}
+.btn-restart:hover{background:#d04d63;}
+
+/* footer */
+footer{
+  text-align:center;
+  padding:1.5rem;
+  font-size:0.7rem;
+  color:var(--muted);
+  letter-spacing:0.1em;
+  border-top:1px solid var(--border);
+  position:relative;z-index:1;
+}
+
+@keyframes slideIn{
+  from{opacity:0;transform:translateX(30px);}
+  to{opacity:1;transform:translateX(0);}
+}
+
+.card-wrap{animation:slideIn 0.35s ease;}
+
+@media(max-width:520px){
+  .list-row{grid-template-columns:1fr 1fr;}.list-es{display:none;}
+  .controls{gap:0.6rem;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <p class="header-eyebrow">🌹 8. März · Wortschatz</p>
+  <h1>Internationaler <span>Frauentag</span></h1>
+  <p class="header-sub">Deutsch · English · Español &nbsp;—&nbsp; <span id="totalCards">0</span> Karten</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="progressText">0 / 0 gelernt</span>
+    <span id="progressPct">0%</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="mode-bar">
+  <button class="mode-btn active" onclick="setMode('cards')" id="mode-cards">🃏 Karteikarten</button>
+  <button class="mode-btn" onclick="setMode('list')" id="mode-list">📋 Liste</button>
+</div>
+
+<!-- Card mode -->
+<div id="cardMode">
+  <div class="summary">
+    <div class="stat"><div class="stat-n" id="knownN">0</div><div class="stat-l">Gewusst</div></div>
+    <div class="stat"><div class="stat-n" id="leftN">0</div><div class="stat-l">Verbleibend</div></div>
+    <div class="stat"><div class="stat-n" id="totalN">0</div><div class="stat-l">Gesamt</div></div>
+  </div>
+
+  <div class="arena" id="arena">
+    <div class="card-wrap" id="cardWrap" onclick="flipCard()">
+      <div class="card-inner" id="cardInner">
+        <div class="card-face front" id="cardFront">
+          <div class="card-label">DEUTSCH</div>
+          <div class="card-word" id="frontWord">—</div>
+          <div class="card-type" id="frontType"></div>
+          <div class="card-hint">Klicken zum Umdrehen · Click to flip</div>
+        </div>
+        <div class="card-face back" id="cardBack">
+          <div class="card-label">ÜBERSETZUNG · TRANSLATION</div>
+          <div class="card-translations" id="backTranslations"></div>
+          <div class="card-example" id="backExample" style="display:none"></div>
+          <div class="card-hint">Klicken zum Zurückdrehen</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls" id="controls">
+      <button class="ctrl-btn" onclick="prevCard()" title="Zurück">←</button>
+      <button class="btn-again" onclick="markAgain()">Nochmal</button>
+      <button class="btn-known" onclick="markKnown()">✓ Gewusst</button>
+      <button class="ctrl-btn" onclick="nextCard()" title="Weiter">→</button>
+    </div>
+  </div>
+
+  <div class="done-screen" id="doneScreen">
+    <div class="done-emoji">🌹</div>
+    <div class="done-title">Sehr gut gemacht!</div>
+    <div class="done-sub">Du hast alle Karten dieser Kategorie gelernt.</div>
+    <button class="btn-restart" onclick="restart()">Nochmal üben · Practice again</button>
+  </div>
+</div>
+
+<!-- List mode -->
+<div class="list-view" id="listMode"></div>
+
+<footer>Wortschatz: Internationaler Frauentag &nbsp;·&nbsp; Deutsch lernen mit Claude</footer>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────
+const CARDS = [
+  // NOMEN from PDF + ES table
+  {id:1, cat:'Nomen', de:'der Frauentag', en:"Women's Day", es:'el Día de la Mujer', type:'Nomen'},
+  {id:2, cat:'Nomen', de:'der Internationale Frauentag', en:"International Women's Day", es:'el Día Internacional de la Mujer', type:'Nomen'},
+  {id:3, cat:'Nomen', de:'der Weltfrauentag', en:"International Women's Day", es:'el Día Internacional de la Mujer', type:'Nomen'},
+  {id:4, cat:'Nomen', de:'die Frau', en:'woman', es:'la mujer', type:'Nomen'},
+  {id:5, cat:'Nomen', de:'die Gleichberechtigung', en:'equality', es:'la igualdad de derechos', type:'Nomen'},
+  {id:6, cat:'Nomen', de:'die Frauenrechte', en:"women's rights", es:'los derechos de la mujer', type:'Nomen (Plural)'},
+  {id:7, cat:'Nomen', de:'die Diskriminierung', en:'discrimination', es:'la discriminación', type:'Nomen'},
+  {id:8, cat:'Nomen', de:'die Freiheit', en:'freedom', es:'la libertad', type:'Nomen'},
+  {id:9, cat:'Nomen', de:'die Bildung', en:'education', es:'la educación / formación', type:'Nomen'},
+  {id:10, cat:'Nomen', de:'die Karriere', en:'career', es:'la carrera', type:'Nomen'},
+  {id:11, cat:'Nomen', de:'die Familie', en:'family', es:'la familia', type:'Nomen'},
+  {id:12, cat:'Nomen', de:'die Gesellschaft', en:'society', es:'la sociedad', type:'Nomen'},
+  {id:13, cat:'Nomen', de:'die Demonstration', en:'demonstration / protest', es:'la manifestación / protesta', type:'Nomen'},
+  {id:14, cat:'Nomen', de:'die Bewegung', en:'movement', es:'el movimiento', type:'Nomen'},
+  {id:15, cat:'Nomen', de:'die Aktivistin', en:'female activist', es:'la activista', type:'Nomen'},
+  {id:16, cat:'Nomen', de:'der Aktivist', en:'activist', es:'el activista', type:'Nomen'},
+  {id:17, cat:'Nomen', de:'die Solidarität', en:'solidarity', es:'la solidaridad', type:'Nomen'},
+  {id:18, cat:'Nomen', de:'die Chance', en:'opportunity', es:'la oportunidad', type:'Nomen'},
+  {id:19, cat:'Nomen', de:'die Ungleichheit', en:'inequality', es:'la desigualdad', type:'Nomen'},
+  {id:20, cat:'Nomen', de:'der Respekt', en:'respect', es:'el respeto', type:'Nomen'},
+  {id:21, cat:'Nomen', de:'die Unterstützung', en:'support', es:'el apoyo / la ayuda', type:'Nomen'},
+  {id:22, cat:'Nomen', de:'der Lohn', en:'wage / salary', es:'el salario', type:'Nomen'},
+  {id:23, cat:'Nomen', de:'die Sorgearbeit', en:'care work', es:'el trabajo de cuidados', type:'Nomen'},
+  {id:24, cat:'Nomen', de:'die Nelke', en:'carnation', es:'el clavel', type:'Nomen'},
+  {id:25, cat:'Nomen', de:'die Anerkennung', en:'recognition', es:'el reconocimiento', type:'Nomen'},
+  {id:26, cat:'Nomen', de:'die Forderung', en:'demand', es:'la exigencia', type:'Nomen'},
+  {id:27, cat:'Nomen', de:'das Unternehmen', en:'company / business', es:'la empresa', type:'Nomen'},
+  {id:28, cat:'Nomen', de:'der Kampftag', en:'day of struggle', es:'el día de lucha', type:'Nomen'},
+  {id:29, cat:'Nomen', de:'die Aufmerksamkeit', en:'attention', es:'la atención', type:'Nomen'},
+  {id:30, cat:'Nomen', de:'die Inhalte', en:'contents / topics', es:'los contenidos / los temas', type:'Nomen (Plural)'},
+  {id:31, cat:'Nomen', de:'die Anliegen', en:'concerns / interests', es:'las preocupaciones / los intereses', type:'Nomen (Plural)'},
+  {id:32, cat:'Nomen', de:'die Stimmen', en:'voices / votes', es:'las voces / los votos', type:'Nomen (Plural)'},
+  {id:33, cat:'Nomen', de:'die Veränderungen', en:'changes', es:'los cambios', type:'Nomen (Plural)'},
+  {id:34, cat:'Nomen', de:'die Vereinbarkeit', en:'compatibility / work-life balance', es:'la conciliación (familia y trabajo)', type:'Nomen'},
+  {id:35, cat:'Nomen', de:'der Schutz vor Gewalt', en:'protection against violence', es:'protección contra la violencia', type:'Nomen'},
+  {id:36, cat:'Nomen', de:'die Verteilung von Sorgearbeit', en:'distribution of care work', es:'la distribución del trabajo de cuidados', type:'Nomen'},
+
+  // VERBEN from PDF + table
+  {id:37, cat:'Verben', de:'kämpfen', en:'to fight', es:'luchar', type:'Verb · kämpft · kämpfte · hat gekämpft'},
+  {id:38, cat:'Verben', de:'unterstützen', en:'to support', es:'apoyar / ayudar', type:'Verb · unterstützt · unterstützte · hat unterstützt'},
+  {id:39, cat:'Verben', de:'feiern', en:'to celebrate', es:'celebrar', type:'Verb · feiert · feierte · hat gefeiert'},
+  {id:40, cat:'Verben', de:'demonstrieren', en:'to demonstrate', es:'manifestarse', type:'Verb · demonstriert · demonstrierte · hat demonstriert'},
+  {id:41, cat:'Verben', de:'fordern', en:'to demand', es:'exigir / demandar', type:'Verb · fordert · forderte · hat gefordert'},
+  {id:42, cat:'Verben', de:'respektieren', en:'to respect', es:'respetar', type:'Verb · respektiert · respektierte · hat respektiert'},
+  {id:43, cat:'Verben', de:'stärken', en:'to strengthen', es:'fortalecer', type:'Verb · stärkt · stärkte · hat gestärkt'},
+  {id:44, cat:'Verben', de:'verändern', en:'to change', es:'cambiar / transformar', type:'Verb · verändert · veränderte · hat verändert'},
+  {id:45, cat:'Verben', de:'verbessern', en:'to improve', es:'mejorar', type:'Verb · verbessert · verbesserte · hat verbessert'},
+  {id:46, cat:'Verben', de:'erreichen', en:'to achieve', es:'lograr / alcanzar', type:'Verb · erreicht · erreichte · hat erreicht'},
+  {id:47, cat:'Verben', de:'ernst nehmen', en:'to take seriously', es:'tomar en serio', type:'Verb (Phrase)'},
+  {id:48, cat:'Verben', de:'werben', en:'to advertise / promote', es:'hacer publicidad / promocionar', type:'Verb · wirbt · warb · hat geworben'},
+  {id:49, cat:'Verben', de:'erinnern', en:'to remember / remind', es:'recordar', type:'Verb · erinnert · erinnerte · hat erinnert'},
+  {id:50, cat:'Verben', de:'in den Hintergrund geraten', en:'to fade into the background', es:'quedar en segundo plano', type:'Verb (Phrase)'},
+  {id:51, cat:'Verben', de:'überreichen', en:'to hand over officially', es:'entregar / entregar oficialmente', type:'Verb · überreicht · überreichte · hat überreicht'},
+  {id:52, cat:'Verben', de:'den eigentlichen Sinn unsichtbar machen', en:'to obscure the true meaning', es:'hacer invisible el verdadero sentido del día', type:'Verb (Phrase)'},
+
+  // ADJEKTIVE from PDF
+  {id:53, cat:'Adjektive', de:'gleichberechtigt', en:'equal (rights)', es:'con igualdad de derechos', type:'Adjektiv'},
+  {id:54, cat:'Adjektive', de:'stark', en:'strong', es:'fuerte', type:'Adjektiv'},
+  {id:55, cat:'Adjektive', de:'unabhängig', en:'independent', es:'independiente', type:'Adjektiv'},
+  {id:56, cat:'Adjektive', de:'mutig', en:'brave', es:'valiente', type:'Adjektiv'},
+  {id:57, cat:'Adjektive', de:'wichtig', en:'important', es:'importante', type:'Adjektiv'},
+  {id:58, cat:'Adjektive', de:'politisch', en:'political', es:'político/a', type:'Adjektiv'},
+  {id:59, cat:'Adjektive', de:'sozial', en:'social', es:'social', type:'Adjektiv'},
+  {id:60, cat:'Adjektive', de:'aktiv', en:'active', es:'activo/a', type:'Adjektiv'},
+  {id:61, cat:'Adjektive', de:'engagiert', en:'committed / engaged', es:'comprometido/a', type:'Adjektiv'},
+  {id:62, cat:'Adjektive', de:'erfolgreich', en:'successful', es:'exitoso/a', type:'Adjektiv'},
+  {id:63, cat:'Adjektive', de:'genannt', en:'called / named', es:'llamado / denominado', type:'Adjektiv (Partizip)'},
+  {id:64, cat:'Adjektive', de:'echte Anerkennung', en:'genuine recognition', es:'reconocimiento verdadero', type:'Adjektiv + Nomen'},
+
+  // BEISPIELSÄTZE
+  {id:65, cat:'Sätze', de:'Der Internationale Frauentag wird am 8. März gefeiert.', en:"International Women's Day is celebrated on March 8.", es:'El Día Internacional de la Mujer se celebra el 8 de marzo.', type:'Beispielsatz'},
+  {id:66, cat:'Sätze', de:'Viele Menschen demonstrieren für Gleichberechtigung.', en:'Many people demonstrate for equality.', es:'Muchas personas se manifiestan por la igualdad de derechos.', type:'Beispielsatz'},
+  {id:67, cat:'Sätze', de:'Frauen kämpfen für ihre Rechte.', en:'Women fight for their rights.', es:'Las mujeres luchan por sus derechos.', type:'Beispielsatz'},
+  {id:68, cat:'Sätze', de:'Die Gesellschaft soll Frauen stärker unterstützen.', en:'Society should support women more.', es:'La sociedad debe apoyar más a las mujeres.', type:'Beispielsatz'},
+  {id:69, cat:'Sätze', de:'Forderungen nach Gleichberechtigung geraten schnell in den Hintergrund.', en:'Demands for equality quickly fade into the background.', es:'Las exigencias de igualdad quedan rápidamente en segundo plano.', type:'Beispielsatz'},
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let currentFilter = 'Alle';
+let mode = 'cards';
+let deck = [];
+let deckIndex = 0;
+let known = new Set();
+let flipped = false;
+
+const CATS = ['Alle','Nomen','Verben','Adjektive','Sätze'];
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+function init(){
+  document.getElementById('totalCards').textContent = CARDS.length;
+  buildTabs();
+  buildDeck();
+  renderCard();
+  renderList();
+}
+
+function buildTabs(){
+  const el = document.getElementById('tabs');
+  el.innerHTML = CATS.map(c =>
+    `<button class="tab${c===currentFilter?' active':''}" onclick="setFilter('${c}')">${c} <small>${c==='Alle'?CARDS.length:CARDS.filter(x=>x.cat===c).length}</small></button>`
+  ).join('');
+}
+
+function setFilter(f){
+  currentFilter = f;
+  known.clear();
+  buildTabs();
+  buildDeck();
+  deckIndex = 0;
+  flipped = false;
+  document.getElementById('cardWrap').classList.remove('flipped');
+  document.getElementById('doneScreen').classList.remove('visible');
+  document.getElementById('arena').style.display = 'flex';
+  renderCard();
+  renderList();
+}
+
+function buildDeck(){
+  const base = currentFilter==='Alle' ? CARDS : CARDS.filter(c=>c.cat===currentFilter);
+  deck = shuffle([...base]);
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr;
+}
+
+// ── CARD RENDER ───────────────────────────────────────────────────────────────
+function renderCard(){
+  updateStats();
+  const remaining = deck.filter(c=>!known.has(c.id));
+  if(remaining.length===0){showDone();return;}
+  if(deckIndex>=remaining.length) deckIndex=0;
+  const card = remaining[deckIndex];
+
+  // front
+  const fw = document.getElementById('frontWord');
+  const ft = document.getElementById('frontType');
+  if(card.cat==='Sätze'){
+    fw.innerHTML = `<span style="font-size:0.7em;font-style:italic">${esc(card.de)}</span>`;
+  } else {
+    // split article
+    const m = card.de.match(/^(der|die|das|die \(Pl\.\))\s(.+)$/);
+    if(m) fw.innerHTML = `<span class="article">${m[1]}</span>${esc(m[2])}`;
+    else fw.innerHTML = esc(card.de);
+  }
+  ft.textContent = card.type;
+
+  // back
+  const bt = document.getElementById('backTranslations');
+  bt.innerHTML = `
+    <div class="trans-row"><span class="trans-flag">🇬🇧</span><span class="trans-text">${esc(card.en)}</span></div>
+    <div class="trans-row"><span class="trans-flag">🇪🇸</span><span class="trans-text">${esc(card.es)}</span></div>
+  `;
+  document.getElementById('backExample').style.display='none';
+
+  // re-animate
+  const wrap = document.getElementById('cardWrap');
+  wrap.style.animation='none';
+  void wrap.offsetWidth;
+  wrap.style.animation='';
+
+  flipped = false;
+  wrap.classList.remove('flipped');
+}
+
+function flipCard(){
+  flipped = !flipped;
+  document.getElementById('cardWrap').classList.toggle('flipped', flipped);
+}
+
+function nextCard(){
+  const remaining = deck.filter(c=>!known.has(c.id));
+  deckIndex = (deckIndex+1) % Math.max(remaining.length,1);
+  flipped=false;
+  renderCard();
+}
+
+function prevCard(){
+  const remaining = deck.filter(c=>!known.has(c.id));
+  deckIndex = (deckIndex-1+remaining.length) % Math.max(remaining.length,1);
+  flipped=false;
+  renderCard();
+}
+
+function markKnown(){
+  const remaining = deck.filter(c=>!known.has(c.id));
+  if(remaining.length===0) return;
+  known.add(remaining[deckIndex].id);
+  const newRemaining = deck.filter(c=>!known.has(c.id));
+  if(newRemaining.length===0){showDone();return;}
+  if(deckIndex>=newRemaining.length) deckIndex=0;
+  flipped=false;
+  renderCard();
+}
+
+function markAgain(){nextCard();}
+
+function showDone(){
+  document.getElementById('arena').style.display='none';
+  document.getElementById('doneScreen').classList.add('visible');
+  updateStats();
+}
+
+function restart(){
+  known.clear();
+  buildDeck();
+  deckIndex=0;
+  flipped=false;
+  document.getElementById('doneScreen').classList.remove('visible');
+  document.getElementById('arena').style.display='flex';
+  document.getElementById('cardWrap').classList.remove('flipped');
+  renderCard();
+}
+
+function updateStats(){
+  const base = currentFilter==='Alle' ? CARDS : CARDS.filter(c=>c.cat===currentFilter);
+  const total = base.length;
+  const knownN = base.filter(c=>known.has(c.id)).length;
+  const left = total - knownN;
+  document.getElementById('knownN').textContent = knownN;
+  document.getElementById('leftN').textContent = left;
+  document.getElementById('totalN').textContent = total;
+  const pct = total>0 ? Math.round(knownN/total*100) : 0;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressText').textContent = `${knownN} / ${total} gelernt`;
+  document.getElementById('progressPct').textContent = pct+'%';
+}
+
+// ── LIST RENDER ───────────────────────────────────────────────────────────────
+function renderList(){
+  const el = document.getElementById('listMode');
+  const filtered = currentFilter==='Alle' ? CARDS : CARDS.filter(c=>c.cat===currentFilter);
+  const groups = {};
+  filtered.forEach(c=>{ if(!groups[c.cat]) groups[c.cat]=[]; groups[c.cat].push(c); });
+
+  el.innerHTML = Object.entries(groups).map(([cat,items])=>`
+    <div class="list-group">
+      <div class="list-group-title">${cat}</div>
+      ${items.map(c=>`
+        <div class="list-row">
+          <div class="list-de">${formatDe(c.de)}</div>
+          <div class="list-en">${esc(c.en)}</div>
+          <div class="list-es">${esc(c.es)}</div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function formatDe(de){
+  const m = de.match(/^(der|die|das)\s(.+)$/);
+  if(m) return `<span class="art">${m[1]}</span>${esc(m[2])}`;
+  return esc(de);
+}
+
+// ── MODE ──────────────────────────────────────────────────────────────────────
+function setMode(m){
+  mode = m;
+  document.getElementById('cardMode').style.display = m==='cards'?'block':'none';
+  document.getElementById('listMode').classList.toggle('visible', m==='list');
+  document.getElementById('mode-cards').classList.toggle('active', m==='cards');
+  document.getElementById('mode-list').classList.toggle('active', m==='list');
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// keyboard
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'){e.preventDefault();flipCard();}
+  else if(e.code==='ArrowRight') nextCard();
+  else if(e.code==='ArrowLeft') prevCard();
+  else if(e.code==='KeyK') markKnown();
+});
+
+init();
+</script>
+</body>
+</html>
